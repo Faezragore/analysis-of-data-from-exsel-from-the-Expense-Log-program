@@ -22,7 +22,7 @@
 * Третья колонка "sum" сумма(в рублях).
 
 Используемые переменные.
-* `list_of_product_categories` категория продукта или товара записана в список.
+* `list_of_product_categories` категории продуктов или товаров записаннные в список.
 * `product_categories_in_the_exel_file` = pandas.read_excel('Report.xls', sheet_name='Report', keep_default_na=False)
     Указываем название файла и название листа((искать в exsel_файле внизу).
 * all_product_position = product_categories_in_the_exel_file.to_dict(orient='record')  
