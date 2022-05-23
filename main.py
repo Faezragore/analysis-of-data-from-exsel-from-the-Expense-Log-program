@@ -21,43 +21,50 @@ second_column_in_the_file_exel = product_categories_in_the_exel_file.columns.rav
 third_column_in_the_file_exel = product_categories_in_the_exel_file.columns.ravel()[2]
 total_amount_for_product_category_year = collections.defaultdict(list)
 
-def choose_a_month_or_a_year (): # Создаем экземпляр класса ArgumentParser
-    month_or_year = argparse.ArgumentParser()
-    month_or_year.add_argument ('--choosing_month', default=['year'], help='your choice')
 
-    return month_or_year
-
-def get_all_product_positions(position, selected_date):  # получить все позиции продукта
+def get_all_product_positions_for_year(position, selected_year):  # получить все позиции продукта для года
     total_amount = 0
     for one_product_position in all_product_position:
         one_product_position[first_column_in_the_file_exel] = str(one_product_position.get(first_column_in_the_file_exel)).split()[0]
-        if position in one_product_position[second_column_in_the_file_exel]:
-            if selected_date in one_product_position[first_column_in_the_file_exel][5:7]:
+        if selected_year == one_product_position[first_column_in_the_file_exel][0:4]:
+            if position in one_product_position[second_column_in_the_file_exel]:
                 total_amount += one_product_position[third_column_in_the_file_exel]
+
+    group_of_products[position].append(total_amount)
+
+
+def get_all_product_positions_for_month(position, selected_year, choosing_month):  # получить все позиции продукта для месяца
+    total_amount = 0
+    for one_product_position in all_product_position:
+        one_product_position[first_column_in_the_file_exel] = str(one_product_position.get(first_column_in_the_file_exel)).split()[0]
+        if selected_year == one_product_position[first_column_in_the_file_exel][0:4]:
+            if choosing_month == one_product_position[first_column_in_the_file_exel][5:7]:
+                if position in one_product_position[second_column_in_the_file_exel]:
+                    total_amount += one_product_position[third_column_in_the_file_exel]
 
 
     group_of_products[position].append(total_amount)
 
 
-def get_a_position_from_a_list_of_products(list_of_product_categories, selected_date): # получить_позицию из_списка_ категорий продуктов
+def get_a_position_from_a_list_of_products(list_of_product_categories, selected_year, choosing_month): # получить_позицию из_списка_ категорий продуктов
     group_of_products.clear()
     for position in list_of_product_categories:
-        get_all_product_positions(position, selected_date)
+        if choosing_month:
+            get_all_product_positions_for_month(position, selected_year, choosing_month)
+        else:
+            get_all_product_positions_for_year(position, selected_year)
 
 
-def show_expenses_for_year(group_of_products): # показать расходы за год
-    list_of_months_in_a_year = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+def show_expenses_for_year(group_of_products, selected_year, choosing_month): # показать расходы за год
     total_amount_for_year = 0
-    for one_month_out_of_a_year in list_of_months_in_a_year:
-        selected_date = one_month_out_of_a_year
 
-        get_a_position_from_a_list_of_products(list_of_product_categories, selected_date)
-        total_amount = 0    #итоговая сумма
-        sorted_product_group_dictionary = sorted(group_of_products.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
-        for product_category, amount in dict(sorted_product_group_dictionary).items():
-            total_amount += amount[0]
-            total_amount_for_product_category_year[product_category].append(amount[0])
-        total_amount_for_year += total_amount
+    get_a_position_from_a_list_of_products(list_of_product_categories, selected_year, choosing_month)
+    total_amount = 0    #итоговая сумма
+    sorted_product_group_dictionary = sorted(group_of_products.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
+    for product_category, amount in dict(sorted_product_group_dictionary).items():
+        total_amount += amount[0]
+        total_amount_for_product_category_year[product_category].append(amount[0])
+    total_amount_for_year += total_amount
 
     sorted_dictionary_of_product_categories_with_total_for_year = sorted(total_amount_for_product_category_year.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
     for product_category, amount in dict(sorted_dictionary_of_product_categories_with_total_for_year).items():
@@ -65,10 +72,8 @@ def show_expenses_for_year(group_of_products): # показать расходы
 
     print("Итого за год на питание потрачено:", total_amount_for_year)
 
-
-def show_monthly_expense(group_of_products): # показать месячные расходы
-    selected_date = resulting_selection
-    get_a_position_from_a_list_of_products(list_of_product_categories, selected_date)
+def show_monthly_expense(group_of_products, choosing_month, selected_year): # показать месячные расходы
+    get_a_position_from_a_list_of_products(list_of_product_categories, choosing_month, selected_year)
     total_amount = 0    #итоговая сумма
     sorted_product_group_dictionary = sorted(group_of_products.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
     for product_category, amount in dict(sorted_product_group_dictionary).items():
@@ -78,11 +83,14 @@ def show_monthly_expense(group_of_products): # показать месячные
 
 
 if __name__ == "__main__":
-    list_of_months_in_a_year = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-    month_or_year = choose_a_month_or_a_year()
-    namespase = month_or_year.parse_args(sys.argv[1:])
-    resulting_selection = namespase.choosing_month # Записываем в переменную выбор месяца или за весь год
-    if resulting_selection == "year":
-        show_expenses_for_year(group_of_products)
+    print("Здравствуйте!")
+    print("Вы находитесь  в скрипте: Анализ данных из exsel_файла из программы 'Журнала расходов'")
+    print("Подсчет может вестись помесячно и за указанный год!")
+    selected_year = str(input("Укажите пожалуйста год!: "))
+    counting_for_year = str(input("Вам подсчитать за целый год? да или нет: "))
+    if "да" in counting_for_year:
+        choosing_month = False
+        show_expenses_for_year(group_of_products, str(selected_year), choosing_month)
     else:
-        show_monthly_expense(group_of_products)
+        choosing_month = str(input("Укажите месяц! : "))
+        show_monthly_expense(group_of_products, selected_year, choosing_month)
