@@ -10,6 +10,8 @@ import sys
 import os
 import argparse
 from pandas._libs.tslibs.timestamps import Timestamp
+from rich.console import Console
+from rich.table import Table
 
 
 list_of_product_categories = ['Еда', 'Хлеб (батон)', 'Фрукты', 'Овощи', 'Крупы,макароны', 'Печенье(конфеты и другое сладкое)', 'Молочка(молоко,кефир,творог)', 'Мясо(кура,гов,свинина,индейка)', 'Пюре,йогурт детям.', 'Ветчина(колбаса,сосиски)', 'Вкусности детям', 'Работа_еда']
@@ -28,7 +30,7 @@ def get_all_product_positions_for_year(position, selected_year):  # получи
         one_product_position[first_column_in_the_file_exel] = str(one_product_position.get(first_column_in_the_file_exel)).split()[0]
         if selected_year == one_product_position[first_column_in_the_file_exel][0:4]:
             if position in one_product_position[second_column_in_the_file_exel]:
-                total_amount += one_product_position[third_column_in_the_file_exel]
+                total_amount += -1 * (one_product_position[third_column_in_the_file_exel])
 
     group_of_products[position].append(total_amount)
 
@@ -57,6 +59,9 @@ def get_a_position_from_a_list_of_products(list_of_product_categories, selected_
 
 def show_expenses_for_year(group_of_products, selected_year, choosing_month): # показать расходы за год
     total_amount_for_year = 0
+    table = Table(title="потрачено на еду за год")
+    table.add_column("Категория", justify="right", style="cyan")
+    table.add_column("Сумма", style="magenta")
 
     get_a_position_from_a_list_of_products(list_of_product_categories, selected_year, choosing_month)
     total_amount = 0    #итоговая сумма
@@ -68,8 +73,10 @@ def show_expenses_for_year(group_of_products, selected_year, choosing_month): # 
 
     sorted_dictionary_of_product_categories_with_total_for_year = sorted(total_amount_for_product_category_year.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
     for product_category, amount in dict(sorted_dictionary_of_product_categories_with_total_for_year).items():
-        print("За год на", product_category, "потрачено", sum(amount), "рублей!")
-
+        table.add_row(product_category, str(round(sum(amount))))
+        #print("За год на", product_category, "потрачено", sum(amount), "рублей!")
+    console = Console()
+    console.print(table)
     print("Итого за год на питание потрачено:", total_amount_for_year)
 
 def show_monthly_expense(group_of_products, choosing_month, selected_year): # показать месячные расходы
