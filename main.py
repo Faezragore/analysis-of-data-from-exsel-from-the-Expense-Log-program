@@ -27,8 +27,8 @@ total_amount_for_product_category_year = collections.defaultdict(list)
 def get_all_product_positions_for_year(position, selected_year):  # получить все позиции продукта для года
     total_amount = 0
     for one_product_position in all_product_position:
-        one_product_position[first_column_in_the_file_exel] = str(one_product_position.get(first_column_in_the_file_exel)).split()[0]
-        if selected_year == one_product_position[first_column_in_the_file_exel][0:4]:
+        date_comparison = str(one_product_position['DateTime'])
+        if selected_year in date_comparison:
             if position in one_product_position[second_column_in_the_file_exel]:
                 total_amount += -1 * (one_product_position[third_column_in_the_file_exel])
 
@@ -77,7 +77,7 @@ def show_expenses_for_year(group_of_products, selected_year, choosing_month): # 
         #print("За год на", product_category, "потрачено", sum(amount), "рублей!")
     console = Console()
     console.print(table)
-    print("Итого за год на питание потрачено:", total_amount_for_year)
+    print("Итого за", selected_year, "год на питание потрачено:", str(round(total_amount_for_year)))
 
 def show_monthly_expense(group_of_products, choosing_month, selected_year): # показать месячные расходы
     get_a_position_from_a_list_of_products(list_of_product_categories, choosing_month, selected_year)
@@ -93,11 +93,19 @@ if __name__ == "__main__":
     print("Здравствуйте!")
     print("Вы находитесь  в скрипте: Анализ данных из exsel_файла из программы 'Журнала расходов'")
     print("Подсчет может вестись помесячно и за указанный год!")
-    selected_year = str(input("Укажите пожалуйста год!: "))
-    counting_for_year = str(input("Вам подсчитать за целый год? да или нет: "))
-    if "да" in counting_for_year:
+    print("Выберите один из трех вариантов")
+    print("вариант 1:За год!")
+    print("вариант 2:За месяц!")
+    print("вариант 3:Все время в файле!")
+    choice = str(input("Введите вариант!: "))
+    if choice == "1":
+        selected_year = input("Введите год!: ")
         choosing_month = False
         show_expenses_for_year(group_of_products, str(selected_year), choosing_month)
-    else:
-        choosing_month = str(input("Укажите месяц! : "))
+    elif choice == "2":
+        month_and_year = str(input("Введите год и месяц в формате- '2022_05': "))
+        selected_year = month_and_year[0:4]
+        choosing_month = month_and_year[5:]
         show_monthly_expense(group_of_products, selected_year, choosing_month)
+    elif choice == "3":
+        pass
