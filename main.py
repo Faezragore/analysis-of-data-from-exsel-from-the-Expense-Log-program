@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-
 import pandas
 import xlrd
 import collections
@@ -24,43 +23,30 @@ third_column_in_the_file_exel = product_categories_in_the_exel_file.columns.rave
 total_amount_for_product_category_year = collections.defaultdict(list)
 
 
-def get_all_product_positions_for_year(position, selected_year):  # получить все позиции продукта для года
+def get_all_product_positions(position, selected_year, choosing_month): # получить все позиции продукта
     total_amount = 0
     for one_product_position in all_product_position:
         date_comparison = str(one_product_position['DateTime'])
         if selected_year in date_comparison:
             if position in one_product_position[second_column_in_the_file_exel]:
                 total_amount += -1 * (one_product_position[third_column_in_the_file_exel])
+            if choosing_month:
+                if choosing_month == date_comparison:
+                    if position in one_product_position[second_column_in_the_file_exel]:
+                        total_amount += -1 * one_product_position[third_column_in_the_file_exel]
 
     group_of_products[position].append(total_amount)
-
-
-def get_all_product_positions_for_month(position, selected_year, choosing_month):  # получить все позиции продукта для месяца
-    total_amount = 0
-    for one_product_position in all_product_position:
-        one_product_position[first_column_in_the_file_exel] = str(one_product_position.get(first_column_in_the_file_exel)).split()[0]
-        if selected_year == one_product_position[first_column_in_the_file_exel][0:4]:
-            if choosing_month == one_product_position[first_column_in_the_file_exel][5:7]:
-                if position in one_product_position[second_column_in_the_file_exel]:
-                    total_amount += one_product_position[third_column_in_the_file_exel]
-
-
-    group_of_products[position].append(total_amount)
-
 
 def get_a_position_from_a_list_of_products(list_of_product_categories, selected_year, choosing_month): # получить_позицию из_списка_ категорий продуктов
     group_of_products.clear()
     for position in list_of_product_categories:
-        if choosing_month:
-            get_all_product_positions_for_month(position, selected_year, choosing_month)
-        else:
-            get_all_product_positions_for_year(position, selected_year)
+        get_all_product_positions(position, selected_year, choosing_month)
 
 
 def show_expenses_for_year(group_of_products, selected_year, choosing_month): # показать расходы за год
     total_amount_for_year = 0
     table = Table(title="потрачено на еду за год")
-    table.add_column("Категория", justify="right", style="cyan")
+    table.add_column("Категория", justify="left", style="cyan")
     table.add_column("Сумма", style="magenta")
 
     get_a_position_from_a_list_of_products(list_of_product_categories, selected_year, choosing_month)
@@ -74,19 +60,23 @@ def show_expenses_for_year(group_of_products, selected_year, choosing_month): # 
     sorted_dictionary_of_product_categories_with_total_for_year = sorted(total_amount_for_product_category_year.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
     for product_category, amount in dict(sorted_dictionary_of_product_categories_with_total_for_year).items():
         table.add_row(product_category, str(round(sum(amount))))
-        #print("За год на", product_category, "потрачено", sum(amount), "рублей!")
     console = Console()
     console.print(table)
     print("Итого за", selected_year, "год на питание потрачено:", str(round(total_amount_for_year)))
 
 def show_monthly_expense(group_of_products, choosing_month, selected_year): # показать месячные расходы
+    table = Table(title="потрачено на еду за месяц")
+    table.add_column("Категория", justify="left", style="cyan")
+    table.add_column("Сумма", style="magenta")
     get_a_position_from_a_list_of_products(list_of_product_categories, choosing_month, selected_year)
     total_amount = 0    #итоговая сумма
     sorted_product_group_dictionary = sorted(group_of_products.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
     for product_category, amount in dict(sorted_product_group_dictionary).items():
         total_amount += amount[0]
-        print("За месяц на", product_category, "потрачено", amount[0], "рублей!")
-    print("Итого за месяц на питание потрачено:", total_amount, "рублей!")
+        table.add_row(product_category, str(round(amount[0])))
+        console = Console()
+        console.print(table)
+    print("Итого за месяц на питание потрачено:", round(total_amount), "рублей!")
 
 
 if __name__ == "__main__":
@@ -101,11 +91,11 @@ if __name__ == "__main__":
     if choice == "1":
         selected_year = input("Введите год!: ")
         choosing_month = False
-        show_expenses_for_year(group_of_products, str(selected_year), choosing_month)
+        show_expenses_for_year(group_of_products, str(selected_year), str(choosing_month))
     elif choice == "2":
         month_and_year = str(input("Введите год и месяц в формате- '2022_05': "))
         selected_year = month_and_year[0:4]
         choosing_month = month_and_year[5:]
-        show_monthly_expense(group_of_products, selected_year, choosing_month)
+        show_monthly_expense(group_of_products, str(selected_year), str(choosing_month))
     elif choice == "3":
         pass
