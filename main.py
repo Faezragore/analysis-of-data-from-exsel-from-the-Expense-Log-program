@@ -29,10 +29,11 @@ def get_all_product_positions(position, selected_year, choosing_month): # пол
         date_comparison = str(one_product_position['DateTime'])
         if selected_year in date_comparison:
             if position in one_product_position[second_column_in_the_file_exel]:
-                total_amount += -1 * (one_product_position[third_column_in_the_file_exel])
-            if choosing_month:
-                if choosing_month == date_comparison:
-                    if position in one_product_position[second_column_in_the_file_exel]:
+                if choosing_month == "False":
+                    total_amount += -1 * one_product_position[third_column_in_the_file_exel]
+                else:
+                    date_comparison = date_comparison[5:7]
+                    if choosing_month == date_comparison:
                         total_amount += -1 * one_product_position[third_column_in_the_file_exel]
 
     group_of_products[position].append(total_amount)
@@ -73,9 +74,11 @@ def show_monthly_expense(group_of_products, choosing_month, selected_year): # п
     sorted_product_group_dictionary = sorted(group_of_products.items(), key=lambda x: x[1])  # отсортированный словарь группы продуктов
     for product_category, amount in dict(sorted_product_group_dictionary).items():
         total_amount += amount[0]
+        #print(product_category , amount[0])
+        #print(total_amount)
         table.add_row(product_category, str(round(amount[0])))
-        console = Console()
-        console.print(table)
+    console = Console()
+    console.print(table)
     print("Итого за месяц на питание потрачено:", round(total_amount), "рублей!")
 
 
